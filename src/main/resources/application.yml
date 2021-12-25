@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    coin-station:
+      platform: mysql
+      #jdbcUrl: jdbc:mysql://127.0.0.1:3307/coin_station?characterEncoding=utf8&useUnicode=true&serverTimezone=Asia/Seoul
+      jdbcUrl: jdbc:mysql://124.59.134.30:3307/coin_station?characterEncoding=utf8&useUnicode=true&serverTimezone=Asia/Seoul
+      username: mydoor+coin
+      password: Wjdgh306!?
+      driverClassName: com.mysql.cj.jdbc.Driver
+  application:
+    name: rest-api
+  profiles:
+    active: dev
+
+---
+
+spring:
+  application:
+    name: rest-api
+  profiles:
+    active: prod
