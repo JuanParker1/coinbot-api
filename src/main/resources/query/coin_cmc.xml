@@ -3,7 +3,7 @@
 
 <mapper namespace="cmc">
 
-	<select id="getCoinInfo" resultType="io.jeongho.coin.daemon.beans.CoinInfoCMC">
+	<select id="getCoinInfo">
 		
 		SELECT * FROM tb_coin_info WHERE symbol = #{param};
 	

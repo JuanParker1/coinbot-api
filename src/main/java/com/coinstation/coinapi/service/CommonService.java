@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.message.BasicHeader;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -14,6 +16,8 @@ import java.util.Map;
 @Service
 public class CommonService {
 
+    @Autowired
+    private SqlSessionTemplate sqlSession;
     /**
      *	API Key가 있는 GET 요청의 헤더 설정
      * @param http
@@ -43,4 +47,5 @@ public class CommonService {
         ObjectMapper mapper = new ObjectMapper();
         return (Map)mapper.readValue(jsonData, Map.class);
     }
+
 }

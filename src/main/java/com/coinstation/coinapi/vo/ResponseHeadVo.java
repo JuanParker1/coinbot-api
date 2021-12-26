@@ -1,4 +1,4 @@
-package com.coinstation.coinapi.controller.vo;
+package com.coinstation.coinapi.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
