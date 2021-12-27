@@ -13,16 +13,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/coin")
 public class CoinController {
-    @GetMapping(value = "/{symbol}", produces = "application/json")
-    ResponseEntity<?> getHelloWorld(@PathVariable String symbol){
+
+    /**
+     *
+     * @param symbol
+     * @return
+     */
+    @GetMapping(value = "/price/allmarket/{symbol}", produces = "application/json")
+    ResponseEntity<?> getHelloWorld(@PathVariable(value = "symbol") String symbol){
         HttpStatus resMessage = HttpStatus.OK;
         String detail = "정상";
         ObjectMapper mapper = new ObjectMapper();
         Boolean isError = false;
         Integer resCode = resMessage.value();
+        String msg = "";
 
         // 응답결과 만들기
         ResponseVo responseVo = new ResponseVo();
+
+        /* 1. 닉네임을 검색해서 해방 코인의 symbol 가져오기
+        *     검색했는데 코인이 없으면 뒷 로직 스톱하고 없다고 메시지 뱉을 것*/
+
+
+        /* 2. 검색가능한 거래소를 DB에서 가져오기(가져올 떄 거래소 순서에 맞게 가져올 것)*/
+
+        /* 3. 가져온 거래소 정보와 코인 가격 api 요청을 차례대로 실행*/
 
         if (isError) {
             resMessage = HttpStatus.INTERNAL_SERVER_ERROR;
