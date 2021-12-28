@@ -7,9 +7,9 @@
 
 		/* 방, 닉네임이 중복되지 않을 경우만 insert */
 		INSERT INTO coin_station.tb_coin_nick
-			(coin_symbol, nick_nm, ref_room_id, create_dt)
+			(coin_symbol, nick_nm, create_dt)
 		SELECT
-			#{coin_symbol}, #{nick_nm}, #{ref_room_id}, now()
+			#{coin_symbol}, #{nick_nm}, now()
 		FROM DUAL
 		WHERE
 			NOT EXISTS
@@ -17,8 +17,12 @@
 					SELECT
 						*
 					FROM coin_station.tb_coin_nick
-					WHERE #{nick_nm} = nick_nm
-					  AND #{ref_room_id} = ref_room_id
+					WHERE nick_nm = #{nick_nm}
 				);
 	</insert>
+
+	<select id="getCoinNick" parameterType="String" resultType="com.coinstation.coinapi.vo.CoinNickVo>">
+		SELECT * FROM tb_coin_nick
+		WHERE nick_nm = #{nick}
+	</select>
 </mapper>
