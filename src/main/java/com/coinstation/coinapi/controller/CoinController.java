@@ -1,8 +1,11 @@
 package com.coinstation.coinapi.controller;
 
+import com.coinstation.coinapi.service.CoinPriceService;
+import com.coinstation.coinapi.vo.CoinNickVo;
 import com.coinstation.coinapi.vo.ResponseHeadVo;
 import com.coinstation.coinapi.vo.ResponseVo;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,26 +17,40 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/coin")
 public class CoinController {
 
+    @Autowired
+    private CoinPriceService coinPriceService;
+
     /**
      *
      * @param symbol
      * @return
      */
-    @GetMapping(value = "/price/allmarket/{symbol}", produces = "application/json")
-    ResponseEntity<?> getHelloWorld(@PathVariable(value = "symbol") String symbol){
+    @GetMapping(value = "/price/allmarket/{nick}", produces = "application/json")
+    ResponseEntity<?> getHelloWorld(@PathVariable(value = "nick") String nick){
         HttpStatus resMessage = HttpStatus.OK;
         String detail = "정상";
         ObjectMapper mapper = new ObjectMapper();
         Boolean isError = false;
         Integer resCode = resMessage.value();
         String msg = "";
+        boolean has_nick = true; //닉네임 검색 결과 (true 있음 / false 없음)
+        String symbol = "";
 
         // 응답결과 만들기
         ResponseVo responseVo = new ResponseVo();
 
-        /* 1. 닉네임을 검색해서 해방 코인의 symbol 가져오기
-        *     검색했는데 코인이 없으면 뒷 로직 스톱하고 없다고 메시지 뱉을 것*/
-
+        /* 1. 닉네임을 검색해서 해당 코인의 symbol 가져오기
+        *     검색했는데 symbol이 없으면 뒷 로직 스톱하고 없다고 메시지 뱉을 것*/
+        if( nick.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*") ){   // 한글로 검색 들어오면 닉네임 검색
+            CoinNickVo nickVo = coinPriceService.getCoinNick(nick);
+            if(nickVo == null) {
+                has_nick = false;
+            }else{
+                symbol = nickVo.getCoin_symbol();  // 닉네임에서 검색해서 나오면 symbol에 넣어줌
+            }
+        }else if( nick.matches("^[a-zA-Z]*$") ){    // 영어로 검색 들어오면 바로 symbol로 받음
+            symbol = nick;
+        }
 
         /* 2. 검색가능한 거래소를 DB에서 가져오기(가져올 떄 거래소 순서에 맞게 가져올 것)*/
 

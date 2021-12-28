@@ -33,32 +33,14 @@ public class CoinPriceService {
 	@Autowired
 	private CommonService commonService;
 
-	@Autowired
-	@Qualifier(CoinApiConstants.DB_SOURCE_COIN_STATION)
-	private SqlSession SqlSession;
+	private SqlSession sqlSession;
 
 	/**
-	 * 코인 가격 조회
+	 * 코인 별명 가져오기
 	 * @param
 	 */
-	public String insertCoinNick(){
-		HttpGet http = new HttpGet(CoinApiConstants.API_COIN_MARKET_CAP_LIST);
-
-		String result = "SUCCESS";
-
-		List<Map<String,Object>> cMapList = new ArrayList<Map<String,Object>>();
-		try (CloseableHttpClient httpclient = HttpClients.custom().build(); CloseableHttpResponse response = httpclient.execute(http)) {
-			response.getStatusLine().getStatusCode();
-			String dataStr = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-
-			Map<String,Object> map = commonService.jsonToMap(dataStr);
-			cMapList = (List<Map<String,Object>>)map.get("data");
-		} catch(Exception e) {
-			logger.error("error", e);
-			result = "fail";
-		}
-
-		return result;
+	public CoinNickVo getCoinNick(String nick) {
+		return sqlSession.selectOne("coin_nick.getCoinNick", nick);
 	}
 
 }
