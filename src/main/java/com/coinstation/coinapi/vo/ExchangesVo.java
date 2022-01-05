@@ -11,4 +11,5 @@ public class ExchangesVo {
     private String header_key;
     private String header_value;
     private Integer orders;
+    private String request_str;
 }
