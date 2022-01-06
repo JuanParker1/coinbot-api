@@ -16,7 +16,7 @@ public class CoinApiConstants {
 	public static final String API_UPBIT_COIN_PRICE = "https://api.upbit.com/v1/ticker?markets=KRW-";
 
 	/* 코인원 코인 가격 요청 url */
-	public static final String API_COINONE_COIN_PRICE = "https://api.coinone.co.kr/ticker?currency=";
+	public static final String API_COINONE_COIN_PRICE = "https://api.coinone.co.kr/ticker_utc?currency=";
 
 	/* 빗썸 코인 가격 요청 url */
 	public static final String API_BITHUMB_COIN_PRICE = "https://api.bithumb.com/public/ticker/";
@@ -28,7 +28,7 @@ public class CoinApiConstants {
 	public static final String API_GOPAX_COIN_PRICE = "https://api.gopax.co.kr/trading-pairs/";
 
 	/* FTX 코인 가격 요청 url */
-	public static final String API_FTX_COIN_PRICE = "https://ftx.com/api/markets/{symbol}/usd";
+	public static final String API_FTX_COIN_PRICE = "https://ftx.com/api/markets/";
 	/* FTX API header key set*/
 	public static final String API_FTX_HEADER_API_KEY1 = "FTX-KEY";
 	public static final String API_FTX_HEADER_API_KEY_VALUE1 = "0Zt97x-PvRM3wLTwG-qavAudgN3DwXYz-mjDLbHy";

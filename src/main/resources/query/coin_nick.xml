@@ -20,10 +20,10 @@
 					WHERE nick_nm = #{nick_nm}
 				);
 	</insert>
+	-->
 
-	<select id="getCoinNick" parameterType="String" resultType="com.coinstation.coinapi.vo.CoinNickVo>">
-		SELECT * FROM tb_coin_nick
+	<select id="getCoinNick" parameterType="String" resultType="String">
+		SELECT coin_symbol FROM tb_coin_nick
 		WHERE nick_nm = #{nick}
 	</select>
-	-->
 </mapper>

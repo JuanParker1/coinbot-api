@@ -1,7 +1,9 @@
 package com.coinstation.coinapi.vo;
 
 import lombok.Data;
+import org.springframework.context.annotation.ComponentScan;
 
+@ComponentScan
 @Data
 public class CoinNickVo {
     private Integer id;

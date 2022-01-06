@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -46,6 +48,11 @@ public class CommonService {
     public static Map<String, Object> jsonToMap(String jsonData) throws JsonParseException, JsonMappingException, IOException {
         ObjectMapper mapper = new ObjectMapper();
         return (Map)mapper.readValue(jsonData, Map.class);
+    }
+
+    public static List<Map<String, Object>> jsonToListMap(String jsonData) throws JsonParseException, JsonMappingException, IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(jsonData, ArrayList.class);
     }
 
 }
