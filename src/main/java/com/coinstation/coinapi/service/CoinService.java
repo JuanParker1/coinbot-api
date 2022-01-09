@@ -1,7 +1,7 @@
 package com.coinstation.coinapi.service;
 import com.coinstation.coinapi.CoinApiConstants;
 import com.coinstation.coinapi.config.CommonValues;
-import com.coinstation.coinapi.vo.CoinNickVo;
+import com.coinstation.coinapi.vo.CoinInfoVo;
 import com.coinstation.coinapi.vo.CoinPriceResponseVo;
 import com.coinstation.coinapi.vo.ExchangesVo;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,6 +36,8 @@ public class CoinService {
 	@Autowired
 	@Qualifier(CoinApiConstants.DB_SOURCE_COIN_STATION)
 	private SqlSession sqlSession;
+
+	DecimalFormat percentform = new DecimalFormat("###,###.#");
 
 	/**
 	 * 코인 별명 가져오기
@@ -72,15 +73,14 @@ public class CoinService {
 			CoinPriceResponseVo result;
 			//코인이 없거나 오류가 있을 경우 code라는 키값이 존재
 			if(map.get("code") == null){
-				DecimalFormat form = new DecimalFormat("###,###.####");
-				String price = form.format( Float.parseFloat(map.get("lastPrice").toString()) );
-				DecimalFormat Percentform = new DecimalFormat("###,###.##");
-				String percent = String.valueOf(Percentform.format(Double.parseDouble(map.get("priceChangePercent").toString()))) + " %";
-				result = new CoinPriceResponseVo("BINANCE", price + " USDT", percent);
+				String price = distributeFormat( Float.parseFloat(map.get("lastPrice").toString()) );
+				String percent = String.valueOf(percentform.format(Double.parseDouble(map.get("priceChangePercent").toString()))) + "%";
+				String path = "rdrt/exchange/BINANCE/" + symbol + "/USDT";
+				result = new CoinPriceResponseVo("BINANCE", price + " USDT", percent, CoinApiConstants.API_BINANCE_EXCHANGE_IMAGE, path);
 			}else{
 				result = null;
 			}
-			logger.info("result : ", result);
+			logger.info("result : {}", result);
 
 			return result;
 		} catch(Exception e) {
@@ -108,15 +108,14 @@ public class CoinService {
 			//코인이 없거나 오류가 있을 경우 리스트가 아니라 바로 키값이 존재
 			if(dataStr.startsWith("[")){
 				Map<String,Object> map = commonService.jsonToListMap(dataStr).get(0);
-				DecimalFormat Priceform = new DecimalFormat("###,###.####");
-				String price = Priceform.format( Float.parseFloat(map.get("trade_price").toString()) );
-				DecimalFormat Percentform = new DecimalFormat("###,###.##");
-				String percent = String.valueOf( Percentform.format(Double.parseDouble(map.get("signed_change_rate").toString()) * 100) ) + " %";
-				result = new CoinPriceResponseVo("UPBIT", price + " KRW", percent );
+				String price = distributeFormat( Float.parseFloat(map.get("trade_price").toString()) );
+				String percent = String.valueOf( percentform.format(Double.parseDouble(map.get("signed_change_rate").toString()) * 100) ) + "%";
+				String path = "rdrt/exchange/UPBIT/" + symbol + "/KRW";
+				result = new CoinPriceResponseVo("UPBIT", price + " KRW", percent, CoinApiConstants.API_UPBIT_EXCHANGE_IMAGE, path );
 			}else{
 				result = null;
 			}
-			logger.info("result : ", result);
+			logger.info("result : {}", result);
 
 			return result;
 		} catch(Exception e) {
@@ -145,17 +144,17 @@ public class CoinService {
 
 			CoinPriceResponseVo result;
 			//success == true일 경우
-			if((boolean)map.get("success")){
+			if((boolean)map.get("success") == true){
 				Map<String,Object> m = (Map<String,Object>)map.get("result");
-				DecimalFormat form = new DecimalFormat("###,###.####");
-				String price = form.format( Float.parseFloat(m.get("price").toString()) );
-				DecimalFormat Percentform = new DecimalFormat("###,###.##");
-				String percent = String.valueOf( Percentform.format(Double.parseDouble(m.get("change24h").toString()) * 100) ) + " %";
-				result = new CoinPriceResponseVo("FTX", price + " USD", percent );
+				
+				String price = distributeFormat( Float.parseFloat(m.get("price").toString()) );
+				String percent = String.valueOf( percentform.format(Double.parseDouble(m.get("change24h").toString()) * 100) ) + "%";
+				String path = "rdrt/exchange/FTX/" + symbol + "/USD";
+				result = new CoinPriceResponseVo("FTX", price + " USD", percent, CoinApiConstants.API_FTX_EXCHANGE_IMAGE, path );
 			}else{
 				result = null;
 			}
-			logger.info("result : ", result);
+			logger.info("result : {}", result);
 
 			return result;
 		} catch(Exception e) {
@@ -179,21 +178,19 @@ public class CoinService {
 			//status == 0000일 경우 조회성공
 			if(map.get("status").toString().equals("0000")){
 				Map<String,Object> m = (Map<String,Object>)map.get("data");
-				DecimalFormat form = new DecimalFormat("###,###.####");
-				String price = form.format( Float.parseFloat(m.get("closing_price").toString()) );
+				String price = distributeFormat( Float.parseFloat(m.get("closing_price").toString()) );
 
 				Double o_price = Double.parseDouble(m.get("opening_price").toString());		// 시작가
 				Double now_price = Double.parseDouble(m.get("closing_price").toString());	// 현재가
 
 				Double calculPercent = ( o_price - now_price ) / o_price * 100;
-				DecimalFormat Percentform = new DecimalFormat("###,###.##");
-				String percent =  Percentform.format(calculPercent) + " %";
-
-				result = new CoinPriceResponseVo("BITHUMB", price + " KRW", percent );
+				String percent =  percentform.format(calculPercent) + "%";
+				String path = "rdrt/exchange/BITHUMB/" + symbol + "/KRW";
+				result = new CoinPriceResponseVo("BITHUMB", price + " KRW", percent, CoinApiConstants.API_BITHUMB_EXCHANGE_IMAGE, path );
 			}else{
 				result = null;
 			}
-			logger.info("result : ", result);
+			logger.info("result : {}", result);
 
 			return result;
 		} catch(Exception e) {
@@ -219,26 +216,54 @@ public class CoinService {
 			CoinPriceResponseVo result;
 			//코인이 없거나 오류가 있을 경우 currency가 최상단에 나오지 않음
 			if(map.get("currency") != null){
-				DecimalFormat form = new DecimalFormat("###,###.####");
-				String price = form.format( Float.parseFloat(map.get("last").toString()) );
+				String price = distributeFormat( Float.parseFloat(map.get("last").toString()) );
 
 				Double o_price = Double.parseDouble(map.get("yesterday_last").toString());		// 시작가
 				Double now_price = Double.parseDouble(map.get("last").toString());	// 현재가
 
 				Double calculPercent = ( o_price - now_price ) / o_price * 100;
-				DecimalFormat Percentform = new DecimalFormat("###,###.##");
-				String percent =  Percentform.format(calculPercent) + " %";
-
-				result = new CoinPriceResponseVo("COINONE", price + " KRW", percent);
+				String percent =  percentform.format(calculPercent) + "%";
+				String path = "rdrt/exchange/COINONE/" + symbol + "/KRW";
+				result = new CoinPriceResponseVo("COINONE", price + " KRW", percent, CoinApiConstants.API_COINONE_EXCHANGE_IMAGE, path);
 			}else{
 				result = null;
 			}
-			logger.info("result : ", result);
+			logger.info("result : {}", result);
 
 			return result;
 		} catch(Exception e) {
 			logger.error("error : ", e);
 			return null;
 		}
+	}
+
+	/**
+	 * 코인 하나의 정보
+	 */
+	public CoinInfoVo getCoinInfo(String symbol) {
+		return sqlSession.selectOne("cmc.getCoinInfo", symbol);
+	}
+
+	/**
+	 * 자릿수에 따른 가격 포맷
+	 */
+	public String distributeFormat(Float param){
+		DecimalFormat formBig = new DecimalFormat("###,###,###");	// 1000 <=
+		DecimalFormat formMid = new DecimalFormat("###.##");			// 10 <= x <1000
+		DecimalFormat formSmall = new DecimalFormat("#.####");		// 10 < x
+
+		String result = "";
+
+		if(param < 10) {
+			result = formSmall.format( param );
+		}
+		if(param >= 10 && param < 1000){
+			result = formSmall.format( param );
+		}
+		if(param >= 1000){
+			result = formBig.format( param );
+		}
+
+		return result;
 	}
 }

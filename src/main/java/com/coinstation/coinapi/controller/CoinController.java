@@ -4,11 +4,6 @@ import com.coinstation.coinapi.service.CoinService;
 import com.coinstation.coinapi.service.CommonService;
 import com.coinstation.coinapi.vo.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/coin")
@@ -37,25 +31,35 @@ public class CoinController {
     @GetMapping(value = "/price/allmarket/{nick}", produces = "application/json")
     ResponseEntity<?> getHelloWorld(@PathVariable(value = "nick") String nick){
         HttpStatus resMessage = HttpStatus.OK;
-        String detail = "정상";
+        String detail = "";
         ObjectMapper mapper = new ObjectMapper();
         Boolean isError = false;
         Integer resCode = resMessage.value();
         String msg = "";
-        boolean has_nick = true; //닉네임 검색 결과 (true 있음 / false 없음)
+        boolean is_symbol = true; // 검색한 값이 symbol인지 nick인지
         String symbol = "";
 
         // 응답결과 만들기
         ResponseVo responseVo = new ResponseVo();
+
+        // Body에 들어갈 응답값
+        Map<String, Object> rspsBody = new HashMap<String, Object>();
 
         /* 1. 닉네임을 검색해서 해당 코인의 symbol 가져오기
         *     검색했는데 symbol이 없으면 뒷 로직 스톱하고 없다고 메시지 뱉을 것*/
         if( nick.matches(".*[ㄱ-ㅎㅏ-ㅣ가-힣]+.*") ){   // 한글로 검색 들어오면 닉네임 검색
             String nickSymbol = coinService.getCoinNick(nick);
             if(nickSymbol == null) {
-                has_nick = false;
+                // 한글로 검색한 결과가 없으므로 바로 응답
+                detail = "등록된 한글 코인명이 없습니다.";
+                resMessage = HttpStatus.OK;
+                responseVo.setHead(new ResponseHeadVo(resCode, resMessage.getReasonPhrase(), detail));
+                responseVo.setBody(null);
+                return ResponseEntity.status(resMessage).body(responseVo);
             }else{
-                symbol = nickSymbol;  // 닉네임에서 검색해서 나오면 symbol에 넣어줌
+                symbol = nickSymbol;
+                detail = nickSymbol;
+                is_symbol = false;
             }
         }else if( nick.matches("^[a-zA-Z]*$") ){    // 영어로 검색 들어오면 바로 symbol로 받음
             symbol = nick;
@@ -84,13 +88,22 @@ public class CoinController {
         CoinPriceResponseVo coinone = coinService.getCoinonePrice(symbol);
         if(coinone != null)coinList.add(coinone);
 
-        if (isError || coinList.size() < 1) {
+        if (isError) {
             resMessage = HttpStatus.INTERNAL_SERVER_ERROR;
             resCode = resMessage.value();
         }
 
+        if(coinList.size() < 1){    // 찾은 코인이 없으면 null
+            detail = "검색된 코인이 없습니다.";
+            responseVo.setBody(null);
+        }else{
+            rspsBody.put("is_symbol", is_symbol);
+            rspsBody.put("coin_info", coinService.getCoinInfo(symbol));
+            rspsBody.put("symbol", symbol.toUpperCase());
+            rspsBody.put("coin_list", coinList);
+            responseVo.setBody(rspsBody);
+        }
         responseVo.setHead(new ResponseHeadVo(resCode, resMessage.getReasonPhrase(), detail));
-        responseVo.setBody(coinList);
 
         return ResponseEntity.status(resMessage).body(responseVo);
     }

@@ -3,7 +3,7 @@
 
 <mapper namespace="cmc">
 
-	<select id="getCoinInfo">
+	<select id="getCoinInfo" resultType="com.coinstation.coinapi.vo.CoinInfoVo">
 		
 		SELECT * FROM tb_coin_info WHERE symbol = #{param};
 	
