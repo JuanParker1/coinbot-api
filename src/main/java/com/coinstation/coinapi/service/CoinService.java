@@ -119,7 +119,7 @@ public class CoinService {
 				if(binance_price == 0){
 					dscription = "UPBIT";
 				}else{
-					dscription = "UPBIT - [ kimchi (" + calculKimchiPrice(Float.parseFloat(map.get("trade_price").toString()), binance_price) +") ]";
+					dscription = "UPBIT [kimchi (" + calculKimchiPrice(Float.parseFloat(map.get("trade_price").toString()), binance_price) +")]";
 				}
 
 				result = new CoinPriceResponseVo(dscription, price + " KRW", percent, CoinApiConstants.API_UPBIT_EXCHANGE_IMAGE, path );
@@ -201,7 +201,7 @@ public class CoinService {
 				if(binance_price == 0){
 					dscription = "BITHUMB";
 				}else{
-					dscription = "BITHUMB - [ kimchi (" + calculKimchiPrice(Float.parseFloat(m.get("closing_price").toString()), binance_price) +") ]";
+					dscription = "BITHUMB [kimchi (" + calculKimchiPrice(Float.parseFloat(m.get("closing_price").toString()), binance_price) +")]";
 				}
 
 				result = new CoinPriceResponseVo(dscription, price + " KRW", percent, CoinApiConstants.API_BITHUMB_EXCHANGE_IMAGE, path );
@@ -246,7 +246,7 @@ public class CoinService {
 				if(binance_price == 0){
 					dscription = "COINONE";
 				}else{
-					dscription = "COINONE - [ kimchi (" + calculKimchiPrice(Float.parseFloat(map.get("last").toString()), binance_price) +") ]";
+					dscription = "COINONE [kimchi (" + calculKimchiPrice(Float.parseFloat(map.get("last").toString()), binance_price) +")]";
 				}
 				result = new CoinPriceResponseVo(dscription, price + " KRW", percent, CoinApiConstants.API_COINONE_EXCHANGE_IMAGE, path);
 			}else{
