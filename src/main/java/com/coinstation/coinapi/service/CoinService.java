@@ -4,6 +4,7 @@ import com.coinstation.coinapi.config.CommonValues;
 import com.coinstation.coinapi.vo.CoinInfoVo;
 import com.coinstation.coinapi.vo.CoinPriceResponseVo;
 import com.coinstation.coinapi.vo.ExchangesVo;
+import com.coinstation.coinapi.vo.ForexVo;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -32,6 +33,9 @@ public class CoinService {
 
 	@Autowired
 	private CommonService commonService;
+
+	@Autowired
+	private InfoService infoService;
 
 	@Autowired
 	@Qualifier(CoinApiConstants.DB_SOURCE_COIN_STATION)
@@ -75,7 +79,7 @@ public class CoinService {
 			if(map.get("code") == null){
 				String price = distributeFormat( Float.parseFloat(map.get("lastPrice").toString()) );
 				String percent = String.valueOf(percentform.format(Double.parseDouble(map.get("priceChangePercent").toString()))) + "%";
-				String path = "rdrt/exchange/BINANCE/" + symbol + "/USDT";
+				String path = "?rdrt-exchange-BINANCE-" + symbol + "USDT";
 				result = new CoinPriceResponseVo("BINANCE", price + " USDT", percent, CoinApiConstants.API_BINANCE_EXCHANGE_IMAGE, path);
 			}else{
 				result = null;
@@ -94,7 +98,7 @@ public class CoinService {
 	 * @param symbol
 	 * @return
 	 */
-	public CoinPriceResponseVo getUpbitPrice(String symbol) {
+	public CoinPriceResponseVo getUpbitPrice(String symbol, float binance_price) {
 
 		symbol = symbol.toUpperCase(Locale.ROOT);
 		HttpGet http = new HttpGet(CoinApiConstants.API_UPBIT_COIN_PRICE + symbol);
@@ -110,8 +114,15 @@ public class CoinService {
 				Map<String,Object> map = commonService.jsonToListMap(dataStr).get(0);
 				String price = distributeFormat( Float.parseFloat(map.get("trade_price").toString()) );
 				String percent = String.valueOf( percentform.format(Double.parseDouble(map.get("signed_change_rate").toString()) * 100) ) + "%";
-				String path = "rdrt/exchange/UPBIT/" + symbol + "/KRW";
-				result = new CoinPriceResponseVo("UPBIT", price + " KRW", percent, CoinApiConstants.API_UPBIT_EXCHANGE_IMAGE, path );
+				String path = "?rdrt-exchange-UPBIT-" + symbol + "KRW";
+				String dscription = "";
+				if(binance_price == 0){
+					dscription = "UPBIT";
+				}else{
+					dscription = "UPBIT - [ kimchi (" + calculKimchiPrice(Float.parseFloat(map.get("trade_price").toString()), binance_price) +") ]";
+				}
+
+				result = new CoinPriceResponseVo(dscription, price + " KRW", percent, CoinApiConstants.API_UPBIT_EXCHANGE_IMAGE, path );
 			}else{
 				result = null;
 			}
@@ -149,7 +160,7 @@ public class CoinService {
 				
 				String price = distributeFormat( Float.parseFloat(m.get("price").toString()) );
 				String percent = String.valueOf( percentform.format(Double.parseDouble(m.get("change24h").toString()) * 100) ) + "%";
-				String path = "rdrt/exchange/FTX/" + symbol + "/USD";
+				String path = "?rdrt-exchange-FTX-" + symbol + "USD";
 				result = new CoinPriceResponseVo("FTX", price + " USD", percent, CoinApiConstants.API_FTX_EXCHANGE_IMAGE, path );
 			}else{
 				result = null;
@@ -163,7 +174,7 @@ public class CoinService {
 		}
 	}
 
-	public CoinPriceResponseVo getBithumbPrice(String symbol) {
+	public CoinPriceResponseVo getBithumbPrice(String symbol, float binance_price) {
 		symbol = symbol.toUpperCase(Locale.ROOT);
 		HttpGet http = new HttpGet(CoinApiConstants.API_BITHUMB_COIN_PRICE + "/" + symbol);
 		commonService.setHeadersWithoutKey(http);
@@ -183,10 +194,17 @@ public class CoinService {
 				Double o_price = Double.parseDouble(m.get("opening_price").toString());		// 시작가
 				Double now_price = Double.parseDouble(m.get("closing_price").toString());	// 현재가
 
-				Double calculPercent = ( o_price - now_price ) / o_price * 100;
+				Double calculPercent = ( now_price - o_price) / o_price * 100;
 				String percent =  percentform.format(calculPercent) + "%";
-				String path = "rdrt/exchange/BITHUMB/" + symbol + "/KRW";
-				result = new CoinPriceResponseVo("BITHUMB", price + " KRW", percent, CoinApiConstants.API_BITHUMB_EXCHANGE_IMAGE, path );
+				String path = "?rdrt-exchange-BITHUMB-" + symbol + "KRW";
+				String dscription = "";
+				if(binance_price == 0){
+					dscription = "BITHUMB";
+				}else{
+					dscription = "BITHUMB - [ kimchi (" + calculKimchiPrice(Float.parseFloat(m.get("closing_price").toString()), binance_price) +") ]";
+				}
+
+				result = new CoinPriceResponseVo(dscription, price + " KRW", percent, CoinApiConstants.API_BITHUMB_EXCHANGE_IMAGE, path );
 			}else{
 				result = null;
 			}
@@ -202,7 +220,7 @@ public class CoinService {
 	/**
 	 * 코인원 가격 정보
 	 */
-	public CoinPriceResponseVo getCoinonePrice(String symbol){
+	public CoinPriceResponseVo getCoinonePrice(String symbol, float binance_price){
 		symbol = symbol.toUpperCase(Locale.ROOT);
 		HttpGet http = new HttpGet(CoinApiConstants.API_COINONE_COIN_PRICE + symbol);
 		commonService.setHeadersWithoutKey(http);
@@ -221,10 +239,16 @@ public class CoinService {
 				Double o_price = Double.parseDouble(map.get("yesterday_last").toString());		// 시작가
 				Double now_price = Double.parseDouble(map.get("last").toString());	// 현재가
 
-				Double calculPercent = ( o_price - now_price ) / o_price * 100;
+				Double calculPercent = ( now_price - o_price) / o_price * 100;
 				String percent =  percentform.format(calculPercent) + "%";
-				String path = "rdrt/exchange/COINONE/" + symbol + "/KRW";
-				result = new CoinPriceResponseVo("COINONE", price + " KRW", percent, CoinApiConstants.API_COINONE_EXCHANGE_IMAGE, path);
+				String path = "?rdrt-exchange-COINONE-" + symbol + "KRW";
+				String dscription = "";
+				if(binance_price == 0){
+					dscription = "COINONE";
+				}else{
+					dscription = "COINONE - [ kimchi (" + calculKimchiPrice(Float.parseFloat(map.get("last").toString()), binance_price) +") ]";
+				}
+				result = new CoinPriceResponseVo(dscription, price + " KRW", percent, CoinApiConstants.API_COINONE_EXCHANGE_IMAGE, path);
 			}else{
 				result = null;
 			}
@@ -241,7 +265,15 @@ public class CoinService {
 	 * 코인 하나의 정보
 	 */
 	public CoinInfoVo getCoinInfo(String symbol) {
-		return sqlSession.selectOne("cmc.getCoinInfo", symbol);
+		CoinInfoVo vo = sqlSession.selectOne("cmc.getCoinInfo", symbol);
+		DecimalFormat form_ = new DecimalFormat("###,###,###.#");
+		vo.setPercent_change_1h( Double.parseDouble(form_.format(vo.getPercent_change_1h())) );
+		vo.setPercent_change_24h( Double.parseDouble(form_.format(vo.getPercent_change_24h())) );
+		vo.setPercent_change_7d( Double.parseDouble(form_.format(vo.getPercent_change_7d())) );
+		vo.setPercent_change_30d( Double.parseDouble(form_.format(vo.getPercent_change_30d())) );
+		vo.setPercent_change_60d( Double.parseDouble(form_.format(vo.getPercent_change_60d())) );
+		vo.setPercent_change_90d( Double.parseDouble(form_.format(vo.getPercent_change_90d())) );
+		return vo;
 	}
 
 	/**
@@ -265,5 +297,19 @@ public class CoinService {
 		}
 
 		return result;
+	}
+
+	/**
+	 * 김프 계산
+	 */
+	public String calculKimchiPrice(float korean, float binance){
+		String result = "";
+		float forex = infoService.getForexInfo("USD").getBase_price();
+
+		float resultFloat = ( korean - (binance * forex) ) / (binance * forex) * 100;
+
+		DecimalFormat form_ = new DecimalFormat("##.#");
+
+		return form_.format(resultFloat) + "%";
 	}
 }

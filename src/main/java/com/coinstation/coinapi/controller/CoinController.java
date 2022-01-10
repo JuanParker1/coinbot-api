@@ -70,10 +70,14 @@ public class CoinController {
 
         //바이낸스
         CoinPriceResponseVo binance = coinService.getBinancePrice(symbol);
-        if(binance != null)coinList.add(binance);
+        float binancePrice = 0;
+        if(binance != null){
+            binancePrice = Float.parseFloat( ((binance.getPrice()).replace(" USDT", "")).replace(",","") );
+            coinList.add(binance);
+        }
         
         //업비트
-        CoinPriceResponseVo upbit = coinService.getUpbitPrice(symbol);
+        CoinPriceResponseVo upbit = coinService.getUpbitPrice(symbol, binancePrice);
         if(upbit != null)coinList.add(upbit);
 
         //ftx
@@ -81,11 +85,11 @@ public class CoinController {
         if(ftx != null)coinList.add(ftx);
 
         //빗썸
-        CoinPriceResponseVo bithumb = coinService.getBithumbPrice(symbol);
+        CoinPriceResponseVo bithumb = coinService.getBithumbPrice(symbol, binancePrice);
         if(bithumb != null)coinList.add(bithumb);
 
         //코인원
-        CoinPriceResponseVo coinone = coinService.getCoinonePrice(symbol);
+        CoinPriceResponseVo coinone = coinService.getCoinonePrice(symbol, binancePrice);
         if(coinone != null)coinList.add(coinone);
 
         if (isError) {
