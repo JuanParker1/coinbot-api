@@ -54,7 +54,7 @@ public class CoinController {
                 detail = "등록된 한글 코인명이 없습니다.";
                 resMessage = HttpStatus.OK;
                 responseVo.setHead(new ResponseHeadVo(resCode, resMessage.getReasonPhrase(), detail));
-                responseVo.setBody(null);
+                rspsBody.put("result_status", "NOT_NICK");
                 return ResponseEntity.status(resMessage).body(responseVo);
             }else{
                 symbol = nickSymbol;
@@ -97,12 +97,22 @@ public class CoinController {
             resCode = resMessage.value();
         }
 
-        if(coinList.size() < 1){    // 찾은 코인이 없으면 null
-            detail = "검색된 코인이 없습니다.";
-            responseVo.setBody(null);
+        CoinInfoVo info = coinService.getCoinInfo(symbol);
+        if(coinList.size() < 1){
+            if(info == null){    // 코인마켓캡에도 없음
+                rspsBody.put("result_status", "NOT_COIN");
+                detail = "존재하지 않는 코인입니다.";
+                responseVo.setBody(rspsBody);
+            }else{
+                rspsBody.put("result_status", "NOT_EXIST");
+                rspsBody.put("coin_info", info);
+                detail = "검색 지원되는 거래소에 해당 코인이 없습니다. 코인마켓캡의 정보를 가져옵니다.";
+                responseVo.setBody(rspsBody);
+            }
         }else{
+            rspsBody.put("result_status", "SUCCESS");
             rspsBody.put("is_symbol", is_symbol);
-            rspsBody.put("coin_info", coinService.getCoinInfo(symbol));
+            rspsBody.put("coin_info", info);
             rspsBody.put("symbol", symbol.toUpperCase());
             rspsBody.put("coin_list", coinList);
             responseVo.setBody(rspsBody);

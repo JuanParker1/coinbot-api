@@ -19,6 +19,8 @@ public class CoinInfoVo {
     private Integer cmc_rank;
     private String last_updated;
     private Double price;
+    private String PriceStr;
+
     private BigDecimal volume_24h;
     private Double volume_change_24h;
     private Double percent_change_1h;
@@ -30,4 +32,5 @@ public class CoinInfoVo {
     private BigDecimal market_cap;
     private Float market_cap_dominance;
     private BigDecimal fully_diluted_market_cap;
+
 }

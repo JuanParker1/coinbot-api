@@ -4,7 +4,6 @@ import com.coinstation.coinapi.config.CommonValues;
 import com.coinstation.coinapi.vo.CoinInfoVo;
 import com.coinstation.coinapi.vo.CoinPriceResponseVo;
 import com.coinstation.coinapi.vo.ExchangesVo;
-import com.coinstation.coinapi.vo.ForexVo;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -265,14 +264,21 @@ public class CoinService {
 	 * 코인 하나의 정보
 	 */
 	public CoinInfoVo getCoinInfo(String symbol) {
-		CoinInfoVo vo = sqlSession.selectOne("cmc.getCoinInfo", symbol);
-		DecimalFormat form_ = new DecimalFormat("###,###,###.#");
-		vo.setPercent_change_1h( Double.parseDouble(form_.format(vo.getPercent_change_1h())) );
-		vo.setPercent_change_24h( Double.parseDouble(form_.format(vo.getPercent_change_24h())) );
-		vo.setPercent_change_7d( Double.parseDouble(form_.format(vo.getPercent_change_7d())) );
-		vo.setPercent_change_30d( Double.parseDouble(form_.format(vo.getPercent_change_30d())) );
-		vo.setPercent_change_60d( Double.parseDouble(form_.format(vo.getPercent_change_60d())) );
-		vo.setPercent_change_90d( Double.parseDouble(form_.format(vo.getPercent_change_90d())) );
+		CoinInfoVo vo;
+		try {
+			vo = sqlSession.selectOne("cmc.getCoinInfo", symbol);
+			DecimalFormat form_ = new DecimalFormat("###,###,###.#");
+
+			vo.setPriceStr(distributeFormatDouble(vo.getPrice()));
+			vo.setPercent_change_1h( Double.parseDouble(form_.format(vo.getPercent_change_1h())) );
+			vo.setPercent_change_24h( Double.parseDouble(form_.format(vo.getPercent_change_24h())) );
+			vo.setPercent_change_7d( Double.parseDouble(form_.format(vo.getPercent_change_7d())) );
+			vo.setPercent_change_30d( Double.parseDouble(form_.format(vo.getPercent_change_30d())) );
+			vo.setPercent_change_60d( Double.parseDouble(form_.format(vo.getPercent_change_60d())) );
+			vo.setPercent_change_90d( Double.parseDouble(form_.format(vo.getPercent_change_90d())) );
+		} catch (NullPointerException e) {
+			vo = null;
+		}
 		return vo;
 	}
 
@@ -282,7 +288,30 @@ public class CoinService {
 	public String distributeFormat(Float param){
 		DecimalFormat formBig = new DecimalFormat("###,###,###");	// 1000 <=
 		DecimalFormat formMid = new DecimalFormat("###.##");			// 10 <= x <1000
-		DecimalFormat formSmall = new DecimalFormat("#.####");		// 10 < x
+		DecimalFormat formSmall = new DecimalFormat("#.#####");		// 10 < x
+
+		String result = "";
+
+		if(param < 10) {
+			result = formSmall.format( param );
+		}
+		if(param >= 10 && param < 1000){
+			result = formSmall.format( param );
+		}
+		if(param >= 1000){
+			result = formBig.format( param );
+		}
+
+		return result;
+	}
+
+	/**
+	 * 자릿수에 따른 가격 포맷
+	 */
+	public String distributeFormatDouble(Double param){
+		DecimalFormat formBig = new DecimalFormat("###,###,###");	// 1000 <=
+		DecimalFormat formMid = new DecimalFormat("###.##");			// 10 <= x <1000
+		DecimalFormat formSmall = new DecimalFormat("#.#####");		// 10 < x
 
 		String result = "";
 
