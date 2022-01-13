@@ -55,6 +55,7 @@ public class CoinController {
                 resMessage = HttpStatus.OK;
                 responseVo.setHead(new ResponseHeadVo(resCode, resMessage.getReasonPhrase(), detail));
                 rspsBody.put("result_status", "NOT_NICK");
+                responseVo.setBody(rspsBody);
                 return ResponseEntity.status(resMessage).body(responseVo);
             }else{
                 symbol = nickSymbol;
