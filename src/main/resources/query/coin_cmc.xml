@@ -28,5 +28,7 @@
 			percent_change_24h = values(percent_change_24h), percent_change_7d = values(percent_change_7d), percent_change_30d = values(percent_change_30d),
 			percent_change_60d = values(percent_change_60d), percent_change_90d = values(percent_change_90d), market_cap = values(market_cap),
 			market_cap_dominance = values(market_cap_dominance), fully_diluted_market_cap = values(fully_diluted_market_cap)
+		WHERE
+			name = values(name)
 	</insert>
 </mapper>
