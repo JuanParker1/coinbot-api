@@ -66,6 +66,12 @@ public class CoinController {
             symbol = nick;
         }
 
+        boolean b_BINANCE = false;
+        boolean b_FTX = false;
+        boolean b_UPBIT = false;
+        boolean b_BITHUMB = false;
+        boolean b_COINONE = false;
+
         /* 2. 코인가격 api 요청을 차례대로 실행*/
         List<CoinPriceResponseVo> coinList = new ArrayList<CoinPriceResponseVo>();
 
@@ -75,23 +81,39 @@ public class CoinController {
         if(binance != null){
             binancePrice = Float.parseFloat( ((binance.getPrice()).replace(" USDT", "")).replace(",","") );
             coinList.add(binance);
+            b_BINANCE = true;
         }
         
         //업비트
         CoinPriceResponseVo upbit = coinService.getUpbitPrice(symbol, binancePrice);
-        if(upbit != null)coinList.add(upbit);
+        if(upbit != null){
+            coinList.add(upbit);
+            b_UPBIT = true;
+        }
+
 
         //ftx
-        CoinPriceResponseVo ftx = coinService.getFtxPrice(symbol);
-        if(ftx != null)coinList.add(ftx);
+        if(!b_BINANCE){    // binance에 있으면 굳이 검색 안함
+            CoinPriceResponseVo ftx = coinService.getFtxPrice(symbol);
+            if(ftx != null)coinList.add(ftx);
+        }
 
         //빗썸
-        CoinPriceResponseVo bithumb = coinService.getBithumbPrice(symbol, binancePrice);
-        if(bithumb != null)coinList.add(bithumb);
+        if(!b_UPBIT){
+            CoinPriceResponseVo bithumb = coinService.getBithumbPrice(symbol, binancePrice);
+            if(bithumb != null){
+                coinList.add(bithumb);
+                b_BITHUMB = true;
+            }
+        }
 
         //코인원
-        CoinPriceResponseVo coinone = coinService.getCoinonePrice(symbol, binancePrice);
-        if(coinone != null)coinList.add(coinone);
+        if(!b_UPBIT && !b_BITHUMB){
+            CoinPriceResponseVo coinone = coinService.getCoinonePrice(symbol, binancePrice);
+            if(coinone != null){
+                coinList.add(coinone);
+            }
+        }
 
         if (isError) {
             resMessage = HttpStatus.INTERNAL_SERVER_ERROR;
